@@ -4,9 +4,10 @@ plugins {
 
 apply plugin: 'idea'
 apply plugin: 'java'
+apply plugin: 'maven-publish'
 
 version = '1.0.0'
-group = 'fr.flowarg.sch'
+group = 'fr.flowarg'
 archivesBaseName = 'sch'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
@@ -29,11 +30,10 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation 'commons-lang:commons-lang:2.6'
     implementation 'com.google.guava:guava:21.0'
-    shadow group: 'org.jetbrains', name: 'annotations', version: '18.0.0'
+    implementation group: 'org.jetbrains', name: 'annotations', version: '18.0.0'
 }
 
-shadowJar {
-    configurations = [project.configurations.shadow]
+jar {
     manifest {
         attributes([
                 "Specification-Title"     : archivesBaseName,
@@ -49,6 +49,51 @@ shadowJar {
                 'Build-OS'                : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
         ])
     }
-    exclude("tests/**")
-    classifier ''
+}
+
+publishing
+        {
+            publications
+                    {
+                        mavenJava(MavenPublication)
+                                {
+                                    pom
+                                            {
+                                                groupId = project.group
+                                                version = project.version
+                                                artifactId = 'sch'
+                                                name = project.name
+                                                description = 'A Spigot library for manage configurations.'
+                                                url = 'https://github.com/FlowArg/SpigotConfigurationHelper'
+
+                                                issueManagement
+                                                        {
+                                                            system = 'github'
+                                                            url = 'https://github.com/FlowArg/SpigotConfigurationHelper/issues'
+                                                        }
+
+                                                licenses
+                                                        {
+                                                            license
+                                                                    {
+                                                                        name = 'Apache 2.0 LICENSE'
+                                                                        url = 'https://github.com/FlowArg/SpigotConfigurationHelper/blob/master/LICENSE'
+                                                                        distribution = 'repo'
+                                                                    }
+                                                        }
+                                            }
+                                }
+                    }
+            repositories
+                    {
+                        maven
+                                {
+                                    url "http://192.168.1.9/maven/"
+                                }
+                    }
+        }
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
