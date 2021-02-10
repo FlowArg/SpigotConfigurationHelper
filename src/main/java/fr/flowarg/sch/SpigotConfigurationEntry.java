@@ -19,6 +19,7 @@ package fr.flowarg.sch;
 
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -27,12 +28,12 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * SPIGOT CONFIGURATION HELPER - 2020 by FlowArg
+ * SPIGOT CONFIGURATION HELPER - 2021 by FlowArg
  *
  * This class represent an entry in a {@link FileConfiguration}.
  * You can get a value of the key or set a specific value to the key.
  *
- * @author FlowArg - 2020
+ * @author FlowArg - 2021
  *
  * @param <T> This parameter represent the configuration value type.
  */
@@ -313,6 +314,32 @@ public abstract class SpigotConfigurationEntry<T>
 
         @Override
         public void set(Vector value)
+        {
+            this.configuration.set(this.path, value);
+        }
+    }
+
+    public static class OfflinePlayerEntry extends SpigotConfigurationEntry<OfflinePlayer>
+    {
+        /**
+         * Construct a new {@link OfflinePlayerEntry}.
+         *
+         * @param path          path in the {@link FileConfiguration} of the key.
+         * @param configuration given configuration. Nothing else to add.
+         */
+        public OfflinePlayerEntry(String path, FileConfiguration configuration)
+        {
+            super(path, configuration);
+        }
+
+        @Override
+        public OfflinePlayer get()
+        {
+            return this.configuration.getOfflinePlayer(this.path);
+        }
+
+        @Override
+        public void set(OfflinePlayer value)
         {
             this.configuration.set(this.path, value);
         }

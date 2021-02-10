@@ -1,16 +1,30 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "5.2.0"
+    id "com.github.johnrengelman.shadow" version "6.1.0"
 }
 
 apply plugin: 'idea'
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
-version = '1.0.0'
+version = '1.0.1'
 group = 'fr.flowarg'
 archivesBaseName = 'sch'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+    options.encoding = 'UTF-8'
+}
+
+task sourcesJar(type: Jar) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar) {
+    classifier 'javadoc'
+    from javadoc
+}
 
 repositories {
     maven {
@@ -24,13 +38,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.spigotmc:spigot-api:1.15.2-R0.1-SNAPSHOT'
-    implementation 'org.apache.logging.log4j:log4j-api:2.1'
-    implementation 'org.apache.logging.log4j:log4j-core:2.1'
-    implementation 'com.google.code.gson:gson:2.8.0'
-    implementation 'commons-lang:commons-lang:2.6'
-    implementation 'com.google.guava:guava:21.0'
-    implementation group: 'org.jetbrains', name: 'annotations', version: '18.0.0'
+    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
 }
 
 jar {
@@ -38,62 +46,76 @@ jar {
         attributes([
                 "Specification-Title"     : archivesBaseName,
                 "Specification-Vendor"    : "FlowArg",
-                "Specification-Version"   : "1",
+                "Specification-Version"   : project.version,
                 "Implementation-Title"    : project.name,
-                "Implementation-Version"  : getArchiveVersion(),
+                "Implementation-Version"  : project.version,
                 "Implementation-Vendor"   : "flowarg",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
                 'Built-By'                : System.properties['user.name'],
                 'Created-By'              : "Gradle ${gradle.gradleVersion}",
                 'Build-Jdk'               : "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-                'Build-OS'                : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+                'Build-OS'                : "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}",
+                'Automatic-Module-Name'   : 'sch'
         ])
     }
 }
 
-publishing
-        {
-            publications
-                    {
-                        mavenJava(MavenPublication)
-                                {
-                                    pom
-                                            {
-                                                groupId = project.group
-                                                version = project.version
-                                                artifactId = 'sch'
-                                                name = project.name
-                                                description = 'A Spigot library for manage configurations.'
-                                                url = 'https://github.com/FlowArg/SpigotConfigurationHelper'
+artifacts {
+    archives sourcesJar, javadocJar
+}
+        
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifact tasks.sourcesJar
+            artifact tasks.javadocJar
+            
+            pom {
+                groupId = project.group
+                version = project.version
+                artifactId = 'sch'
+                name = project.name
+                description = 'A Spigot library for manage configurations.'
+                url = 'https://github.com/FlowArg/SpigotConfigurationHelper'
 
-                                                issueManagement
-                                                        {
-                                                            system = 'github'
-                                                            url = 'https://github.com/FlowArg/SpigotConfigurationHelper/issues'
-                                                        }
+                scm {
+                    connection = 'scm:git:git://github.com/FlowArg/SpigotConfigurationHelper.git'
+                    developerConnection = 'scm:git:ssh://github.com:FlowArg/SpigotConfigurationHelper.git'
+                    url = 'http://github.com/FlowArg/SpigotConfigurationHelper/tree/master'
+                }
 
-                                                licenses
-                                                        {
-                                                            license
-                                                                    {
-                                                                        name = 'Apache 2.0 LICENSE'
-                                                                        url = 'https://github.com/FlowArg/SpigotConfigurationHelper/blob/master/LICENSE'
-                                                                        distribution = 'repo'
-                                                                    }
-                                                        }
-                                            }
-                                }
+                licenses {
+                    license {
+                        name = 'Apache License 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
-            repositories
-                    {
-                        maven
-                                {
-                                    url "http://192.168.1.9/maven/"
-                                }
+                }
+
+                developers {
+                    developer {
+                        id = 'flowarg'
+                        name = 'Flow Arg'
+                        email = 'coutureflorence3@gmail.com'
                     }
+                }
+            }
         }
+    }
+    
+    repositories {
+        maven {
+            credentials {
+                username ossrhUsername
+                password ossrhPassword
+            }
+            def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+            url = project.version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
+        }
+    }
+}
 
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+signing {
+    sign publishing.publications.mavenJava
 }

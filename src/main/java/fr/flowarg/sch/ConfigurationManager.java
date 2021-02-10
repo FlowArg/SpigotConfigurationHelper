@@ -23,7 +23,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import java.io.IOException;
 
 /**
- * SPIGOT CONFIGURATION HELPER - 2020 by FlowArg
+ * SPIGOT CONFIGURATION HELPER - 2021 by FlowArg
  *
  * This interface have to be implemented by a class for manage a configuration.
  * You must specify few methods :
@@ -31,7 +31,7 @@ import java.io.IOException;
  *  - {@link ConfigurationManager#loadConfig()} to load a configuration.
  *  - {@link ConfigurationManager#getConfig()} to get the current configuration.
  *
- * @author FlowArg - 2020
+ * @author FlowArg - 2021
  */
 @SuppressWarnings("unused")
 public interface ConfigurationManager
